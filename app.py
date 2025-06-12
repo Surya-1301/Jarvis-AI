@@ -8,8 +8,11 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Initialize OpenAI client
-client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+# Initialize OpenAI client with proper configuration
+client = openai.OpenAI(
+    api_key=os.getenv('OPENAI_API_KEY'),
+    base_url="https://api.openai.com/v1"
+)
 
 @app.route('/')
 def home():
@@ -37,6 +40,7 @@ def chat():
             'status': 'success'
         })
     except Exception as e:
+        print(f"Error: {str(e)}")  # Add logging
         return jsonify({
             'error': str(e),
             'status': 'error'
