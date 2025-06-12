@@ -1,12 +1,6 @@
 # Ignore the envJarvis directory
 /envjarvis/
 
-# Ignore contact.csv
-contacts.csv
-
-# Ignore jarvis.db
-jarvis.db
-
 # Ignore Python bytecode files in backend
 /backend/__pycache__/ 
 
@@ -59,3 +53,10 @@ ENV/
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Node modules
+node_modules/
+
+# Frontend build files
+frontend/build/
+frontend/dist/
