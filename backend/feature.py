@@ -215,7 +215,7 @@ def whatsApp(Phone, message, flag, name):
 
 class OpenAIChat:
     def __init__(self, api_key: str, model: str = "gpt-3.5-turbo"):
-        self.client = openai.OpenAI(api_key=api_key)
+        openai.api_key = api_key
         self.model = model
 
     def chat(self, user_message: str, system_prompt: str = "You are a helpful assistant."):
@@ -224,7 +224,7 @@ class OpenAIChat:
             {"role": "user", "content": user_message}
         ]
         try:
-            response = self.client.chat.completions.create(
+            response = openai.ChatCompletion.create(
                 model=self.model,
                 messages=messages,
                 max_tokens=512,
@@ -239,6 +239,7 @@ if __name__ == "__main__":
     hotword()
 
     # Example: test OpenAI chat functionality
+    openai.api_key = os.getenv('OPENAI_API_KEY')
     chat = OpenAIChat(api_key="org-H1hlyH0mn7JA90dokUXtQvJg")
     response = chat.chat("Hello, how are you?")
     print(response)

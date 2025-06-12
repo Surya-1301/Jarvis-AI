@@ -8,11 +8,8 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Initialize OpenAI client with proper configuration
-client = openai.OpenAI(
-    api_key=os.getenv('OPENAI_API_KEY'),
-    base_url="https://api.openai.com/v1"
-)
+# Initialize OpenAI
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 @app.route('/')
 def home():
@@ -25,7 +22,7 @@ def chat():
         user_message = data.get('message', '')
         
         # Get response from OpenAI
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are Jarvis, a helpful AI assistant."},
