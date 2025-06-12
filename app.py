@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 import openai
+import traceback
 
 # Load environment variables
 load_dotenv()
@@ -9,7 +10,12 @@ load_dotenv()
 app = Flask(__name__)
 
 # Initialize OpenAI
-openai.api_key = os.getenv('OPENAI_API_KEY')
+api_key = os.getenv('OPENAI_API_KEY')
+if not api_key:
+    print("WARNING: OPENAI_API_KEY environment variable is not set!")
+else:
+    print(f"OpenAI API Key found: {api_key[:8]}...")  # Print first 8 chars for verification
+openai.api_key = api_key
 
 @app.route('/')
 def home():
@@ -20,6 +26,11 @@ def chat():
     try:
         data = request.json
         user_message = data.get('message', '')
+        
+        if not openai.api_key:
+            raise ValueError("OpenAI API key is not set")
+            
+        print(f"Processing message: {user_message}")
         
         # Get response from OpenAI
         response = openai.ChatCompletion.create(
@@ -37,7 +48,8 @@ def chat():
             'status': 'success'
         })
     except Exception as e:
-        print(f"Error: {str(e)}")  # Add logging
+        error_msg = f"Error: {str(e)}\n{traceback.format_exc()}"
+        print(error_msg)  # Print full error with traceback
         return jsonify({
             'error': str(e),
             'status': 'error'
