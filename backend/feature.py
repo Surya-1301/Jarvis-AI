@@ -239,7 +239,10 @@ if __name__ == "__main__":
     hotword()
 
     # Example: test OpenAI chat functionality
-    openai.api_key = os.getenv('OPENAI_API_KEY')
-    chat = OpenAIChat(api_key="org-H1hlyH0mn7JA90dokUXtQvJg")
-    response = chat.chat("Hello, how are you?")
-    print(response)
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        print("Error: OPENAI_API_KEY environment variable is not set")
+    else:
+        chat = OpenAIChat(api_key=api_key)
+        response = chat.chat("Hello, how are you?")
+        print(response)
