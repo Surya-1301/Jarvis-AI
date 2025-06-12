@@ -8,16 +8,26 @@ import sys
 # Load environment variables
 load_dotenv()
 
+# Print all environment variables (excluding sensitive values)
+print("=== Environment Variables ===")
+for key in os.environ:
+    if 'KEY' in key or 'SECRET' in key:
+        print(f"{key}: {'*' * 8}")
+    else:
+        print(f"{key}: {os.environ[key]}")
+
 app = Flask(__name__)
 
 # Initialize OpenAI
 api_key = os.getenv('OPENAI_API_KEY')
-print("Environment variables:", os.environ.keys())
+print("\n=== OpenAI Configuration ===")
 print("API Key present:", bool(api_key))
 if not api_key:
-    print("WARNING: OPENAI_API_KEY environment variable is not set!")
+    print("ERROR: OPENAI_API_KEY environment variable is not set!")
+    print("Please set OPENAI_API_KEY in your Render environment variables")
 else:
-    print(f"OpenAI API Key found: {api_key[:8]}...")  # Print first 8 chars for verification
+    print(f"API Key found: {api_key[:8]}...")
+
 openai.api_key = api_key
 
 @app.route('/')
@@ -33,7 +43,8 @@ def chat():
         if not openai.api_key:
             raise ValueError("OpenAI API key is not set")
             
-        print(f"Processing message: {user_message}")
+        print(f"\n=== Processing Message ===")
+        print(f"Message: {user_message}")
         print(f"Using API key: {openai.api_key[:8]}...")
         
         # Get response from OpenAI
@@ -71,4 +82,6 @@ def chat():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
+    print(f"\n=== Starting Server ===")
+    print(f"Port: {port}")
     app.run(host='0.0.0.0', port=port) 
