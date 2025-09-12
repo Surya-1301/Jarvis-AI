@@ -442,6 +442,15 @@
             </div>
             <h4 class="text-light text-center">Ask me Anything</h4>
 
+            <div class="col-md-12 mt-2">
+              <div class="d-flex justify-content-center align-items-center gap-2">
+                <label class="text-light">Model:</label>
+                <select id="model-select" class="form-select" style="max-width:280px;">
+                  <option value="" disabled selected>Select a model…</option>
+                </select>
+              </div>
+            </div>
+
             <div class="col-md-12 mt-4 pt-4">
               <div class="text-center">
                 <div id="TextInput" class="d-flex">
@@ -455,9 +464,7 @@
                   <button id="MicBtn" class="glow-on-hover">
                     <i class="bi bi-mic"></i>
                   </button>
-                  <button id="ChatBtn" class="glow-on-hover">
-                    <i class="bi bi-chat-dots"></i>
-                  </button>
+                  <button id="ChatBtn" class="glow-on-hover"><i class="bi bi-chat-dots"></i></button>
                   <button id="SettingBtn" class="glow-on-hover">
                     <i class="bi bi-gear-wide-connected"></i>
                   </button>
@@ -523,5 +530,55 @@
     <script src="main.js"></script>
     <script type="text/javascript" src="/eel.js"></script>
     <script src="controller.js"></script>
+    <script>
+      async function loadModels() {
+        try {
+          const res = await fetch('http://127.0.0.1:8010/models', { method: 'GET' });
+          const data = await res.json();
+          const sel = document.getElementById('model-select');
+          if (Array.isArray(data.allowed_models) && data.allowed_models.length) {
+            for (const m of data.allowed_models) {
+              const opt = document.createElement('option');
+              opt.value = m;
+              opt.textContent = m;
+              sel.appendChild(opt);
+            }
+          }
+        } catch (e) { console.warn('Model load failed', e); }
+      }
+
+      async function sendChat(message) {
+        const sel = document.getElementById('model-select');
+        const model = sel.value || undefined;
+        if (!model) {
+          alert('Please select a model first.');
+          sel.focus();
+          return { status: 'error', error: 'No model selected' };
+        }
+        const body = { message };
+        if (model) body.model = model;
+        const res = await fetch('http://127.0.0.1:8010/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        return data;
+      }
+
+      // Hook ChatBtn to send current chatbox content to Flask
+      document.addEventListener('DOMContentLoaded', () => {
+        loadModels();
+        const chatBtn = document.getElementById('ChatBtn');
+        chatBtn?.addEventListener('click', async () => {
+          const msg = document.getElementById('chatbox').value.trim();
+          if (!msg) return;
+          try {
+            const result = await sendChat(msg);
+            console.log('Chat result', result);
+          } catch (e) { console.error('Chat error', e); }
+        });
+      });
+    </script>
   </body>
 </html>

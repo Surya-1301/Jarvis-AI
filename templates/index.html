@@ -1,116 +1,52 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jarvis Assistant</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f0f2f5;
-        }
-        .chat-container {
-            background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .message {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .user-message {
-            background-color: #e3f2fd;
-            margin-left: 20%;
-        }
-        .assistant-message {
-            background-color: #f5f5f5;
-            margin-right: 20%;
-        }
-        .input-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        input[type="text"] {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-    </style>
-</head>
-<body>
-    <div class="chat-container">
-        <h1>Jarvis Assistant</h1>
-        <div id="chat-messages"></div>
-        <div class="input-container">
-            <input type="text" id="user-input" placeholder="Type your message...">
-            <button onclick="sendMessage()">Send</button>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Jarvis Ai - R3TiR3D</title>
+    <link rel="icon" type="image/png" href="/static/img/favicon.png" />
+    <link rel="apple-touch-icon" href="/static/img/favicon.png" />
+    <link rel="stylesheet" href="/static/css/styles.css" />
+    </head>
+    <body>
+        <div class="container">
+            <div class="shell">
+                <header class="header">
+                    <a class="brand" href="/"><span class="dot"></span> JARVIS</a>
+                    <div class="controls">
+                        {% if session.is_admin %}
+                        <a class="btn" href="/admin/users">Admin</a>
+                        {% endif %}
+                        <select id="model" class="select">
+                            <option value="" disabled selected>Select a model…</option>
+                        </select>
+                        {% if session.username %}
+                        <form method="POST" action="/logout">
+                            <button class="btn btn-outline" type="submit">Logout</button>
+                        </form>
+                        {% else %}
+                        <a class="btn btn-outline" href="/login">Login</a>
+                        <a class="btn primary" href="/signup">Sign up</a>
+                        {% endif %}
+                    </div>
+                </header>
+
+                <div class="panel">
+                    <section class="card chat" style="grid-column: 1 / -1;">
+                        <div id="messages" class="messages"></div>
+                        <div class="inputbar">
+                            <input id="input" class="input" placeholder="Type your message..." />
+                            <button id="mic" class="btn" title="Start/Stop voice input">🎤</button>
+                            <button id="speak" class="btn" title="Read AI response aloud">🔊</button>
+                            <button id="send" class="btn primary">Send</button>
+                        </div>
+                    </section>
+                </div>
+
+                
+            </div>
         </div>
-    </div>
 
-    <script>
-        function addMessage(message, isUser) {
-            const messagesDiv = document.getElementById('chat-messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
-            messageDiv.textContent = message;
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        async function sendMessage() {
-            const input = document.getElementById('user-input');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            addMessage(message, true);
-            input.value = '';
-            
-            try {
-                const response = await fetch('/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message }),
-                });
-                
-                const data = await response.json();
-                
-                if (data.status === 'success') {
-                    addMessage(data.response, false);
-                } else {
-                    addMessage('Sorry, I encountered an error.', false);
-                }
-            } catch (error) {
-                addMessage('Sorry, I encountered an error.', false);
-            }
-        }
-
-        // Allow sending message with Enter key
-        document.getElementById('user-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-    </script>
-</body>
-</html> 
+        <script src="/static/js/app.js"></script>
+    </body>
+</html>

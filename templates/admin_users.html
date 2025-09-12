@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin · Users</title>
+    <link rel="icon" type="image/png" href="/static/img/favicon.png" />
+    <link rel="apple-touch-icon" href="/static/img/favicon.png" />
+    <link rel="stylesheet" href="/static/css/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="shell">
+        <header class="header">
+          <a class="brand" href="/"><span class="dot"></span> JARVIS</a>
+          <div class="header-actions">
+            <a class="btn" href="/chat">Back to Chat</a>
+            <form method="POST" action="/logout"><button class="btn btn-outline" type="submit">Logout</button></form>
+          </div>
+        </header>
+        <section class="card" style="padding:16px">
+          <h2>Users</h2>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Username</th>
+                  <th>Admin</th>
+                  <th>Created</th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for u in users %}
+                <tr>
+                  <td>{{ u.id }}</td>
+                  <td>{{ u.username }}</td>
+                  <td>{{ 'Yes' if u.is_admin else 'No' }}</td>
+                  <td>{{ u.created_at }}</td>
+                  <td><a class="btn" href="/admin/users/{{ u.id }}">Edit</a></td>
+                  <td>
+                    <form method="POST" action="/admin/users/{{ u.id }}/delete" onsubmit="return confirm('Delete user {{ u.username }}?');">
+                      <button class="btn" type="submit">Delete</button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+       
+      </div>
+    </div>
+  </body>
+</html>

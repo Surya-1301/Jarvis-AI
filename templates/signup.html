@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign up · Jarvis</title>
+    <link rel="icon" type="image/png" href="/static/img/favicon.png" />
+    <link rel="apple-touch-icon" href="/static/img/favicon.png" />
+    <link rel="stylesheet" href="/static/css/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="shell">
+        <header class="header">
+          <a class="brand" href="/"><span class="dot"></span> JARVIS</a>
+        </header>
+        <section class="card auth-card">
+          <h2>Create your Jarvis account</h2>
+          {% if error %}
+          <p class="muted" style="color:#ff9aa2">{{ error }}</p>
+          {% endif %}
+          <form method="POST" class="auth-actions">
+            <input name="username" class="input" placeholder="Username" required />
+            <input name="password" type="password" class="input" placeholder="Password" required />
+            <input name="confirm" type="password" class="input" placeholder="Confirm password" required />
+            <button class="btn primary" type="submit">Sign up</button>
+          </form>
+          <p class="muted">Already have an account? <a class="link" href="/login">Log in</a></p>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>

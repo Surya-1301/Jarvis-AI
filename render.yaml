@@ -7,5 +7,15 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.11
-      - key: OPENAI_API_KEY
-        sync: false 
+      - key: LLM_PROVIDER
+        value: copilot
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: COPILOT_MODEL
+        value: gpt-4o-mini
+      # Optional override for API base (defaults to https://models.inference.ai.azure.com)
+      # - key: COPILOT_API_BASE
+      #   value: https://models.inference.ai.azure.com
+      # Optional: keep OpenAI support if you want to switch back
+      # - key: OPENAI_API_KEY
+      #   sync: false

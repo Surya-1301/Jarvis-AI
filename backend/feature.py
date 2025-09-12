@@ -23,6 +23,7 @@ import struct
 import hugchat
 import eel
 import openai
+import httpx
 
 # Initialize pygame mixer
 pygame.mixer.init()
@@ -214,23 +215,58 @@ def whatsApp(Phone, message, flag, name):
         print(f"WhatsApp error: {e}")
 
 class OpenAIChat:
-    def __init__(self, api_key: str, model: str = "gpt-3.5-turbo"):
-        openai.api_key = api_key
+    def __init__(self, api_key: str | None = None, model: str = "gpt-3.5-turbo"):
+        self.provider = os.getenv("LLM_PROVIDER", "openai").lower()
         self.model = model
+        if self.provider == "copilot":
+            self.token = os.getenv("GITHUB_TOKEN") or os.getenv("COPILOT_TOKEN")
+            self.api_base = os.getenv("COPILOT_API_BASE", "https://models.inference.ai.azure.com")
+            if model == "gpt-3.5-turbo":
+                # Default to a reasonable Copilot model if caller uses old default
+                self.model = os.getenv("COPILOT_MODEL", "gpt-4o-mini")
+        else:
+            # OpenAI path
+            if api_key:
+                openai.api_key = api_key
+            elif os.getenv("OPENAI_API_KEY"):
+                openai.api_key = os.getenv("OPENAI_API_KEY")
+            if os.getenv("OPENAI_API_BASE"):
+                openai.api_base = os.getenv("OPENAI_API_BASE")
 
     def chat(self, user_message: str, system_prompt: str = "You are a helpful assistant."):
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_message}
+            {"role": "user", "content": user_message},
         ]
         try:
-            response = openai.ChatCompletion.create(
-                model=self.model,
-                messages=messages,
-                max_tokens=512,
-                temperature=0.7
-            )
-            return response.choices[0].message.content.strip()
+            if self.provider == "copilot":
+                if not self.token:
+                    return "Error: Copilot token not set (GITHUB_TOKEN or COPILOT_TOKEN)."
+                url = f"{self.api_base.rstrip('/')}/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {self.token}",
+                    "Content-Type": "application/json",
+                }
+                payload = {
+                    "model": self.model,
+                    "messages": messages,
+                    "max_tokens": 512,
+                    "temperature": 0.7,
+                }
+                with httpx.Client(timeout=60) as client:
+                    r = client.post(url, headers=headers, json=payload)
+                if r.status_code >= 400:
+                    return f"Error: Copilot API {r.status_code}: {r.text}"
+                data = r.json()
+                return data["choices"][0]["message"]["content"].strip()
+            else:
+                response = openai.ChatCompletion.create(
+                    model=self.model,
+                    messages=messages,
+                    max_tokens=512,
+                    temperature=0.7,
+                )
+                return response.choices[0].message.content.strip()
         except Exception as e:
             return f"Error: {e}"
 
@@ -238,11 +274,9 @@ if __name__ == "__main__":
     # Example: test hotword detection
     hotword()
 
-    # Example: test OpenAI chat functionality
-    api_key = os.getenv('OPENAI_API_KEY')
-    if not api_key:
-        print("Error: OPENAI_API_KEY environment variable is not set")
-    else:
-        chat = OpenAIChat(api_key=api_key)
-        response = chat.chat("Hello, how are you?")
-        print(response)
+    # Example: test chat functionality
+    provider = os.getenv('LLM_PROVIDER', 'openai')
+    print(f"Testing provider: {provider}")
+    chat = OpenAIChat(api_key=os.getenv('OPENAI_API_KEY'))
+    response = chat.chat("Hello, how are you?")
+    print(response)

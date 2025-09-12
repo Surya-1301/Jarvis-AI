@@ -1,0 +1,29 @@
+[build]
+  publish = "static"
+  command = "echo 'Build frontend only; backend served elsewhere'"
+
+# Set BACKEND_URL in Netlify environment variables (e.g., Render or Vercel URL)
+[[redirects]]
+  from = "/api/*"
+  to = "${BACKEND_URL}/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/chat"
+  to = "${BACKEND_URL}/chat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/models"
+  to = "${BACKEND_URL}/models"
+  status = 200
+  force = true
+
+# Redirect root to backend home so Netlify serves the Flask UI
+[[redirects]]
+  from = "/"
+  to = "${BACKEND_URL}/"
+  status = 200
+  force = true

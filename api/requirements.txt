@@ -1,7 +1,7 @@
+vercel-wsgi==0.8.1
 flask==3.0.2
 gunicorn==21.2.0
 openai==0.28.1
 python-dotenv==1.0.0
 requests==2.31.0
 httpx==0.24.1
-vercel-wsgi==0.8.1
