@@ -15,7 +15,7 @@
     "react-scripts": "^5.0.1"
   },
   "dependencies": {
-    "cross-spawn": "^7.0.6",
+    "cross-spawn": "^6.0.5",
     "netlify-cli": "^23.5.1"
   },
   "browserslist": {
