@@ -11,13 +11,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # --- Perplexity & Gemini Integration ---
 def perplexity_chat(message):
     api_key = os.getenv("PERPLEXITY_API_KEY")
-    url = "https://api.perplexity.ai/v1/chat/completions"
+    url = "https://api.perplexity.ai/chat/completions"
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
     payload = {
-        "model": "pplx-7b-chat",
+        "model": "sonar-pro",
         "messages": [
             {"role": "user", "content": message}
         ]
@@ -29,7 +29,7 @@ def perplexity_chat(message):
 
 def gemini_chat(message):
     api_key = os.getenv("GEMINI_API_KEY")
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={api_key}"
     payload = {
         "contents": [
             {"parts": [{"text": message}]}
@@ -131,37 +131,37 @@ if provider == "copilot":
     print("API base:", copilot_api_base)
     # Build allowed models list for UI population
     default_model_list = [
-        "gpt-4o",
-        "gpt-4o-mini",
+        # Copilot supported models (example, update as per docs)
+        "gpt-5",
+        "gpt-5-mini",
         "o4-mini",
         "o3-mini",
         "Llama-3.1-8B-Instruct",
         "Llama-3.1-70B-Instruct",
         "Mistral-large",
         "Phi-4-mini",
-           # Perplexity models
-           "pplx-7b-chat",
-           "pplx-70b-chat",
-           "pplx-7b-online",
-           "pplx-70b-online",
-           # Gemini models
-           "gemini-pro",
-           "gemini-1.5-pro-preview-0409",
-           "gemini-1.5-flash-preview-0514",
-           "gemini-ultra"
-           # OpenAI models
-           "gpt-4",
-           "gpt-4-turbo",
-           "gpt-4-32k",
-           "gpt-4-vision-preview",
-           "gpt-3.5-turbo",
-           "gpt-3.5-turbo-16k",
-           "gpt-3.5-turbo-instruct",
-           "text-davinci-003",
-           "text-davinci-002",
-           "text-curie-001",
-           "text-babbage-001",
-           "text-ada-001"
+        # Perplexity models
+        "sonar-pro",
+        "sonar",
+        "sonar-reasoning",
+        "sonar-deep-research",
+        # Gemini models
+        "gemini-2.5-flash",
+        "gemini-2.5-pro",
+        # OpenAI models
+        "gpt-4",
+        "gpt-4o",
+        "gpt-4-turbo",
+        "gpt-4-32k",
+        "gpt-4-vision-preview",
+        "gpt-3.5-turbo",
+        "gpt-3.5-turbo-16k",
+        "gpt-3.5-turbo-instruct",
+        "text-davinci-003",
+        "text-davinci-002",
+        "text-curie-001",
+        "text-babbage-001",
+        "text-ada-001"
     ]
     if allowed_models_env:
         if allowed_models_env.strip() == "*":
@@ -240,15 +240,26 @@ def chat():
         # Get response from selected provider or model
         try:
             # Perplexity models
-            if selected_model.startswith("pplx-"):
+            if selected_model in ["sonar-pro", "sonar", "sonar-reasoning", "sonar-deep-research"]:
                 content = perplexity_chat(user_message)
                 return jsonify({"response": content, "status": "success"})
             # Gemini models
-            elif selected_model.startswith("gemini-"):
+            elif selected_model in ["gemini-2.5-flash", "gemini-2.5-pro"] or selected_model.startswith("gemini-"):
                 content = gemini_chat(user_message)
                 return jsonify({"response": content, "status": "success"})
             # Copilot models
             elif provider == "copilot":
+                copilot_supported = [
+                    "gpt-5", "gpt-5-mini", "o4-mini", "o3-mini",
+                    "Llama-3.1-8B-Instruct", "Llama-3.1-70B-Instruct",
+                    "Mistral-large", "Phi-4-mini"
+                ]
+                if selected_model not in copilot_supported:
+                    return jsonify({
+                        'error': f"Model '{selected_model}' is not supported by Copilot.",
+                        'allowed_models': copilot_supported,
+                        'status': 'error'
+                    }), 400
                 url = f"{copilot_api_base.rstrip('/')}/chat/completions"
                 token = (os.getenv('GITHUB_TOKEN') or os.getenv('COPILOT_TOKEN'))
                 auth_scheme = os.getenv('COPILOT_AUTH_SCHEME', 'bearer').lower()
@@ -307,12 +318,7 @@ def chat():
                     'response': response.choices[0].message.content,
                     'status': 'success'
                 })
-        except openai.error.AuthenticationError as e:
-            print("Authentication Error:", str(e))
-            raise
-        except openai.error.APIError as e:
-            print("API Error:", str(e))
-            raise
+        # OpenAI error handling: fallback to generic Exception
         except Exception as e:
             print("Unexpected OpenAI Error:", str(e))
             raise
@@ -490,7 +496,7 @@ def admin_delete_user(user_id: int):
     return redirect(url_for('admin_users'))
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 5050))
     print(f"\n=== Starting Server ===")
     print(f"Port: {port}")
     app.run(host='0.0.0.0', port=port) 
