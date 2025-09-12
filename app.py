@@ -22,7 +22,8 @@ app.secret_key = os.getenv("SECRET_KEY", "dev-secret-change-me")
 
 def init_db():
     try:
-        conn = sqlite3.connect("jarvis.db")
+        db_path = os.getenv("DB_PATH", "jarvis.db")
+        conn = sqlite3.connect(db_path)
         cur = conn.cursor()
         cur.execute(
             """
@@ -57,7 +58,8 @@ def ensure_admin_user():
         pwd = os.getenv("ADMIN_PASSWORD", "Rebel_0102")
         if not uname or not pwd:
             return
-        conn = sqlite3.connect("jarvis.db")
+        db_path = os.getenv("DB_PATH", "jarvis.db")
+        conn = sqlite3.connect(db_path)
         cur = conn.cursor()
         cur.execute('SELECT id FROM users WHERE username = ?', (uname,))
         row = cur.fetchone()
@@ -349,7 +351,8 @@ def admin_users():
     guard = _ensure_admin()
     if guard:
         return guard
-    conn = sqlite3.connect('jarvis.db')
+    db_path = os.getenv("DB_PATH", "jarvis.db")
+    conn = sqlite3.connect(db_path)
     cur = conn.cursor()
     cur.execute('SELECT id, username, COALESCE(is_admin,0), created_at FROM users ORDER BY id ASC')
     users = [
@@ -364,7 +367,8 @@ def admin_edit_user(user_id: int):
     guard = _ensure_admin()
     if guard:
         return guard
-    conn = sqlite3.connect('jarvis.db')
+    db_path = os.getenv("DB_PATH", "jarvis.db")
+    conn = sqlite3.connect(db_path)
     cur = conn.cursor()
     if request.method == 'POST':
         new_username = (request.form.get('username') or '').strip()
@@ -404,7 +408,8 @@ def admin_delete_user(user_id: int):
     guard = _ensure_admin()
     if guard:
         return guard
-    conn = sqlite3.connect('jarvis.db')
+    db_path = os.getenv("DB_PATH", "jarvis.db")
+    conn = sqlite3.connect(db_path)
     cur = conn.cursor()
     # Prevent deleting the last admin account
     cur.execute('SELECT COUNT(*) FROM users WHERE COALESCE(is_admin,0)=1')

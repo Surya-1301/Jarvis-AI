@@ -1,28 +1,30 @@
 [build]
   publish = "static"
-  command = "echo 'Serving static; proxying to backend via function'"
+  command = "echo 'Netlify serverless Flask via functions/app.py'"
 
 [functions]
   node_bundler = "esbuild"
+  # Enable Python functions alongside Node ones
+  included_files = ["**/*.py", "templates/**", "static/**"]
 
 # Set BACKEND_URL in Netlify environment variables (e.g., Render or Vercel URL)
 # Send all requests through the proxy function, preserving path
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/proxy/api/:splat"
+  to = "/.netlify/functions/app/api/:splat"
   status = 200
 
 [[redirects]]
   from = "/chat"
-  to = "/.netlify/functions/proxy/chat"
+  to = "/.netlify/functions/app/chat"
   status = 200
 
 [[redirects]]
   from = "/models"
-  to = "/.netlify/functions/proxy/models"
+  to = "/.netlify/functions/app/models"
   status = 200
 
 [[redirects]]
   from = "/"
-  to = "/.netlify/functions/proxy/"
+  to = "/.netlify/functions/app/"
   status = 200

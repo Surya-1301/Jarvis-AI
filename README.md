@@ -152,6 +152,13 @@ Note: Serverless has cold starts and execution time limits; long requests may no
 - Example: `BACKEND_URL=https://your-render-app.onrender.com`.
 - Note: Netlify uses root `requirements.txt` only; avoid including Vercel-only packages there.
 
+### Netlify-only backend (serverless)
+- This repo includes a Netlify Python function wrapper: `netlify/functions/app.py` using `awsgi`.
+- `netlify.toml` routes all paths to the function so Flask runs serverlessly under Netlify’s domain.
+- Caveats:
+	- File system is ephemeral; SQLite writes are not persistent between invocations. For production, use an external DB (e.g., Postgres, Supabase) and set `DB_PATH` accordingly or swap to a DB URL.
+	- Function timeouts can affect long LLM calls; consider keeping Render/Vercel for backend if you see timeouts.
+
 Environment on Render:
 - `PYTHON_VERSION=3.11.11`
 - Choose provider variables as in the `.env` example.
