@@ -1,8 +1,8 @@
 # pyright: reportMissingImports=false
 try:
-    from vercel_wsgi import handle
-except Exception:
-    handle = None
+    import awsgi
+except ImportError:
+    awsgi = None
 
 import os
 import sys
@@ -17,9 +17,9 @@ from app import app as flask_app
 
 
 def handler(event, context):
-    if handle is None:
+    if awsgi is None:
         raise RuntimeError(
-            "vercel-wsgi is not installed. Install with `pip install vercel-wsgi` "
+            "awsgi is not installed. Install with `pip install awsgi` "
             "or ensure Vercel installs dependencies from api/requirements.txt."
         )
-    return handle(event, flask_app)
+    return awsgi.response(flask_app, event, context)
