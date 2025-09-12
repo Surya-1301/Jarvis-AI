@@ -5,3 +5,15 @@ openai==0.28.1
 python-dotenv==1.0.0
 requests==2.31.0
 httpx==0.24.1
+werkzeug==3.0.1
+pyttsx3==2.90
+SpeechRecognition==3.10.0
+eel==0.16.0
+pygame==2.5.2
+pyautogui==0.9.54
+pywhatkit==5.4
+pvporcupine==2.2.0
+pyaudio==0.2.14
+structlog==24.1.0
+hugchat==0.0.11
+sqlite3

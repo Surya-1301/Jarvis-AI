@@ -13,5 +13,8 @@
   "description": "",
   "devDependencies": {
     "react-scripts": "^5.0.1"
+  },
+  "dependencies": {
+    "netlify-cli": "^23.5.1"
   }
 }

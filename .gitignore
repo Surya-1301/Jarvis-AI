@@ -60,3 +60,6 @@ node_modules/
 # Frontend build files
 frontend/build/
 frontend/dist/
+
+# Local Netlify folder
+.netlify
