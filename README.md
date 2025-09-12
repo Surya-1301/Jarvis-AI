@@ -142,6 +142,7 @@ python run.py
 - Vercel will deploy the Flask app as a Python serverless function.
 - Configure env vars in Vercel project (same as `.env`).
 - Route config in `vercel.json` sends all traffic to the function.
+- Note: The serverless adapter `vercel-wsgi` is listed in `api/requirements.txt` (for Vercel only), not in root `requirements.txt` to avoid issues on other platforms.
 
 Note: Serverless has cold starts and execution time limits; long requests may not be ideal.
 
@@ -149,6 +150,7 @@ Note: Serverless has cold starts and execution time limits; long requests may no
 - File added: `netlify.toml` with redirects to a backend URL.
 - Host static assets under `static/` on Netlify; set `BACKEND_URL` to your Render/Vercel backend.
 - Example: `BACKEND_URL=https://your-render-app.onrender.com`.
+- Note: Netlify uses root `requirements.txt` only; avoid including Vercel-only packages there.
 
 Environment on Render:
 - `PYTHON_VERSION=3.11.11`
