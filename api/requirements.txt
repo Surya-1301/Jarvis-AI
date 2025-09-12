@@ -15,4 +15,3 @@ pvporcupine==2.2.0
 pyaudio==0.2.14
 structlog==24.1.0
 hugchat==0.5.1
-sqlite3
