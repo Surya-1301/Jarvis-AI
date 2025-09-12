@@ -8,6 +8,38 @@ import traceback
 import sys
 from werkzeug.security import generate_password_hash, check_password_hash
 
+# --- Perplexity & Gemini Integration ---
+def perplexity_chat(message):
+    api_key = os.getenv("PERPLEXITY_API_KEY")
+    url = "https://api.perplexity.ai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": "pplx-7b-chat",
+        "messages": [
+            {"role": "user", "content": message}
+        ]
+    }
+    with httpx.Client(timeout=30) as client:
+        response = client.post(url, headers=headers, json=payload)
+    response.raise_for_status()
+    return response.json()["choices"][0]["message"]["content"]
+
+def gemini_chat(message):
+    api_key = os.getenv("GEMINI_API_KEY")
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={api_key}"
+    payload = {
+        "contents": [
+            {"parts": [{"text": message}]}
+        ]
+    }
+    with httpx.Client(timeout=30) as client:
+        response = client.post(url, json=payload)
+    response.raise_for_status()
+    return response.json()["candidates"][0]["content"]["parts"][0]["text"]
+
 # Load environment variables
 load_dotenv()
 
@@ -107,6 +139,29 @@ if provider == "copilot":
         "Llama-3.1-70B-Instruct",
         "Mistral-large",
         "Phi-4-mini",
+           # Perplexity models
+           "pplx-7b-chat",
+           "pplx-70b-chat",
+           "pplx-7b-online",
+           "pplx-70b-online",
+           # Gemini models
+           "gemini-pro",
+           "gemini-1.5-pro-preview-0409",
+           "gemini-1.5-flash-preview-0514",
+           "gemini-ultra"
+           # OpenAI models
+           "gpt-4",
+           "gpt-4-turbo",
+           "gpt-4-32k",
+           "gpt-4-vision-preview",
+           "gpt-3.5-turbo",
+           "gpt-3.5-turbo-16k",
+           "gpt-3.5-turbo-instruct",
+           "text-davinci-003",
+           "text-davinci-002",
+           "text-curie-001",
+           "text-babbage-001",
+           "text-ada-001"
     ]
     if allowed_models_env:
         if allowed_models_env.strip() == "*":
@@ -182,10 +237,18 @@ def chat():
                 }), 400
         print(f"Provider: {provider} | Model: {selected_model}")
         
-        # Get response from selected provider
+        # Get response from selected provider or model
         try:
-            if provider == "copilot":
-                # POST to /chat/completions with Bearer token
+            # Perplexity models
+            if selected_model.startswith("pplx-"):
+                content = perplexity_chat(user_message)
+                return jsonify({"response": content, "status": "success"})
+            # Gemini models
+            elif selected_model.startswith("gemini-"):
+                content = gemini_chat(user_message)
+                return jsonify({"response": content, "status": "success"})
+            # Copilot models
+            elif provider == "copilot":
                 url = f"{copilot_api_base.rstrip('/')}/chat/completions"
                 token = (os.getenv('GITHUB_TOKEN') or os.getenv('COPILOT_TOKEN'))
                 auth_scheme = os.getenv('COPILOT_AUTH_SCHEME', 'bearer').lower()
@@ -207,7 +270,6 @@ def chat():
                     ],
                     "temperature": 0.7,
                 }
-                # Choose token param based on model or override
                 token_param = os.getenv('COPILOT_TOKEN_PARAM')
                 if not token_param:
                     sml = selected_model.lower()
@@ -221,10 +283,8 @@ def chat():
                 with httpx.Client(timeout=60) as client:
                     r = client.post(url, headers=headers, json=build_payload(token_param))
                     if r.status_code == 400 and 'max_tokens' in r.text and token_param == 'max_tokens':
-                        # Retry with alternate key for O-models
                         r = client.post(url, headers=headers, json=build_payload('max_completion_tokens'))
                     elif r.status_code == 400 and 'max_completion_tokens' in r.text and token_param == 'max_completion_tokens':
-                        # Retry fallback to classic key
                         r = client.post(url, headers=headers, json=build_payload('max_tokens'))
 
                 if r.status_code >= 400:
@@ -232,6 +292,7 @@ def chat():
                 data = r.json()
                 content = data["choices"][0]["message"]["content"]
                 return jsonify({"response": content, "status": "success"})
+            # OpenAI models
             else:
                 response = openai.ChatCompletion.create(
                     model=selected_model,
