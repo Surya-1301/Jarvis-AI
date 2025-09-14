@@ -4,6 +4,12 @@ A modern AI assistant with two modes:
 
 This README reflects the current codebase layout and how to run both modes.
 
+<p align="center">
+  <a href="https://jarvis-ai-ftti.onrender.com/">
+    <img src="https://img.shields.io/badge/View Demo-0077B5?style=for-the-badge&logo=linkedin&logoColor=white"/>
+  </a>
+</p>
+
 ## Quick Start (Web App)
 
 Prerequisites: Python 3.10+ recommended (Render uses 3.11), `pip`, and an API key for either OpenAI or GitHub Models.
